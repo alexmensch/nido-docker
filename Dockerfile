@@ -1,4 +1,4 @@
-FROM python:3.7-alpine AS nido-base
+FROM arm32v6/python:3.7-alpine AS nido-base
 
 RUN apk add tzdata \
     && cp /usr/share/zoneinfo/America/Los_Angeles /etc/localtime \
@@ -10,17 +10,29 @@ RUN pip install pip wheel setuptools --upgrade
 COPY ./package /app/nido
 WORKDIR /app/nido
 
+
+
+FROM nido-base AS nido-build
+
+RUN apk add build-base
 RUN pip wheel --wheel-dir=/wheelhouse -r requirements.txt
+
+
+
+FROM nido-base AS nido-wheelbase
 
 VOLUME /app/instance
 VOLUME /app/log
+
+COPY --from=nido-build /wheelhouse /wheelhouse
 
 RUN pip install -r requirements.txt --find-links /wheelhouse
 
 WORKDIR /app
 
 
-FROM nido-base AS nido-api
+
+FROM nido-wheelbase AS nido-api
 
 ENV NIDOD_RPC_PORT=49152
 
@@ -30,7 +42,7 @@ ENTRYPOINT ["gunicorn", "-b 0.0.0.0:80", "nido.web:create_app()"]
 
 
 
-FROM nido-base AS nido-supervisor
+FROM nido-wheelbase AS nido-supervisor
 
 ENV NIDO_BASE=/app \
     NIDOD_LOG_FILE=/app/log/nidod.log \
@@ -42,6 +54,6 @@ ENTRYPOINT ["python", "-m", "nido.supervisor"]
 
 
 
-FROM eclipse-mosquitto AS nido-mqtt
+FROM arm32v6/eclipse-mosquitto AS nido-mqtt
 
 COPY ./config/mosquitto.conf /mosquitto/config/mosquitto.conf
