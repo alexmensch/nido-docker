@@ -1,5 +1,7 @@
 FROM arm32v6/python:3.7-alpine AS nido-base
 
+COPY qemu-arm-static /usr/bin
+
 RUN apk add tzdata \
     && cp /usr/share/zoneinfo/UTC /etc/localtime \
     && echo "UTC" > /etc/timezone \
