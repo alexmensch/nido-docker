@@ -1,5 +1,6 @@
 FROM arm32v6/python:3.7-alpine AS nido-base
 
+# See: https://github.com/docker/hub-feedback/issues/1261
 COPY qemu-arm-static /usr/bin
 
 RUN apk add tzdata \
