@@ -11,7 +11,7 @@ RUN apk add tzdata \
 RUN pip install pip --upgrade
 
 RUN apk add build-base \
-    && pip install nido \
+    && pip install "nido>=1,<2" \
     && apk del build-base
 
 WORKDIR /app
