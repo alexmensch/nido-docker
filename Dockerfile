@@ -17,3 +17,4 @@ RUN apk add build-base \
 WORKDIR /app
 VOLUME /app/instance
 VOLUME /app/log
+
